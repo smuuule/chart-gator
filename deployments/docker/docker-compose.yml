@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      context: ../..
+      target: dev
+    container_name: chart-gator-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../..:/app
+    environment:
+      - DATABASE_URL=postgres://${DB_USER:-gator}:${DB_PASSWORD:-password}@postgres:5432/${DB_NAME:-chartgator}
+      - PORT=8080
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:alpine
+    container_name: chart-gator-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-gator}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-chartgator}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
